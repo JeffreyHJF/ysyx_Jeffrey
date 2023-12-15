@@ -12,13 +12,12 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-
 #include <isa.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
-
+#include <stdio.h>
 static int is_batch_mode = false;
 
 void init_regex();
@@ -48,7 +47,16 @@ static int cmd_c(char *args) {
 }
 
 static int cmd_si(char *args) {
-  cpu_exec(1);
+  int step;
+  int ret;	
+  if(args == NULL) {
+	 cpu_exec(1);
+  }
+  else {
+  ret = sscanf(args, "%d", &step);
+  if(ret != 1) printf(" error args input");
+  cpu_exec(step);
+  }
   return 0;
 }
 
