@@ -60,6 +60,17 @@ static int cmd_si(char *args) {
   return 0;
 }
 
+static int cmd_info(char *args) {
+	if(args == NULL) printf("Null args\n");
+	else if(strcmp(args, "r")==0){
+		isa_reg_display();
+	}
+/*	else if(strcmp(args, "w")==0){
+		sdb_watchpoint_display();
+	}*/
+	return 0;
+
+}
 
 static int cmd_q(char *args) {
   nemu_state.state = NEMU_QUIT;
@@ -77,7 +88,7 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si", "Run a step", cmd_si},
-	
+  { "info", "Display info", cmd_info},	
   /* TODO: Add more commands */
 
 };
