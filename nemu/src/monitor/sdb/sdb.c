@@ -18,6 +18,7 @@
 #include <readline/history.h>
 #include "sdb.h"
 #include <stdio.h>
+#include <memory/paddr.h>
 static int is_batch_mode = false;
 
 void init_regex();
@@ -78,9 +79,18 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_x(char *args) {
-	
-	return 0;
 
+if (args == NULL) {
+        printf("Wrong Command!\n");
+        return 0;
+    }
+	int num,exprs;
+	sscanf(args,"%d %x",&num,&exprs);
+	int i;
+	for (i = 0;i < num;i ++){
+		printf("0x%8x  0x%x\n",exprs + i*32,paddr_read(exprs + i * 32,32));
+	}
+	return 0;
 }
 static int cmd_help(char *args);
 
