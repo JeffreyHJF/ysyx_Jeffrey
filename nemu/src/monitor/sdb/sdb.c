@@ -77,6 +77,11 @@ static int cmd_q(char *args) {
   return -1;//modifying
 }
 
+static int cmd_x(char *args) {
+	
+	return 0;
+
+}
 static int cmd_help(char *args);
 
 static struct {
@@ -89,6 +94,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Run a step", cmd_si},
   { "info", "Display info", cmd_info},	
+  { "x", "Scan Memory", cmd_x},
   /* TODO: Add more commands */
 
 };
