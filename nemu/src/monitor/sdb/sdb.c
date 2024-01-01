@@ -79,16 +79,21 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_x(char *args) {
-
-if (args == NULL) {
+	int len;
+	int i;
+	long unsigned int addr;
+	int ret;
+	if (args == NULL) {
         printf("Wrong Command!\n");
         return 0;
     }
-	int num,exprs;
-	sscanf(args,"%d %x",&num,&exprs);
-	int i;
-	for (i = 0;i < num;i ++){
-		printf("0x%8x  0x%x\n",exprs + i*32,paddr_read(exprs + i * 32,32));
+	else {
+		ret = sscanf(args, "%d %lx",&len, &addr);
+		if(ret!=1) printf("error");
+		for(i=0;i<len;i++){
+    	printf("%lx:%x\n",addr,paddr_read(addr,4));
+    	addr += 4;
+		}
 	}
 	return 0;
 }
