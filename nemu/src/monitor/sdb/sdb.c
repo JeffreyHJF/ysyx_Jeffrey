@@ -85,7 +85,7 @@ if (args == NULL) {
         return 0;
     }
 	int num,exprs;
-	sscanf(args,"%d%x",&num,&exprs);
+	sscanf(args,"%d %x",&num,&exprs);
 	int i;
 	for (i = 0;i < num;i ++){
 		printf("0x%8x  0x%x\n",exprs + i*32,paddr_read(exprs + i * 32,32));
