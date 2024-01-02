@@ -23,7 +23,7 @@ enum
 {
   /* TODO: Add more token types */
   TK_NOTYPE = 256,TK_EQ = 255,TK_NEQ = 254,TK_AND = 253,TK_OR = 252,
-  TK_HNUM = 251,TK_DNUM = 250,TK_NEG = 257,TK_REG = 258,TK_DEREF = 259
+  TK_HNUM = 251,TK_DNUM = 250,TK_NEG = 257,TK_REG = 258,TK_DEREF = 259, TK_LEF = 260, TK_RIG = 261
 };
 
 static struct rule {
@@ -34,10 +34,15 @@ static struct rule {
   /* TODO: Add more rules.
    * Pay attention to the precedence level of different rules.
    */
+  {"\\$[a-zA-Z]*[0-9]*", TK_REG},
+  {"0[xX][0-9a-fA-F]+", TK_HNUM},
+  {"\\(", TK_LEF},
+  {"\\)", TK_RIG},
   {"\\b[0-9]+\\b", TK_DNUM},
-  {"/", '/'},
-  {"*", '*'},
-  {"-", '-'},
+  {"\\/", '/'},
+  {"\\*", '*'},
+  {"\\-", '-'},
+  {"\\!", '!'},
   {"|{1,2}", TK_OR}, 
   {"&{1,2}", TK_AND},
   {"!=", TK_NEQ},
@@ -98,11 +103,74 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
+		Token tmp_token;
         switch (rules[i].token_type) {
-          default: TODO();
-        }
+			case 256:				
+				break;
+			case '+': 
+				tmp_token.type = '+';
+				tokens[nr_token++] = tmp_token;
+				break;
+			case '-':
+				tmp_token.type = '-';
+				tokens[nr_token++] = tmp_token;
+				break;
+			case '*':
+				tmp_token.type = '*';
+				tokens[nr_token++] = tmp_token;
+				break;
+			case '/':
+				tmp_token.type = '/';
+				tokens[nr_token++] = tmp_token;	
+				break;
+			case 260:
+				tmp_token.type = '(';
+				tokens[nr_token++] = tmp_token;
+				break;
+			case 261:
+				tmp_token.type = ')';
+				tokens[nr_token++] = tmp_token;			
+				break;
+			case TK_DNUM:
+				tokens[nr_token].type = TK_DNUM;
+				strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
+                nr_token++;
+                break;
+			case TK_REG: // regex
+                tokens[nr_token].type = TK_REG;
+                strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
+                nr_token ++;
+                break;
+            case TK_HNUM:
+                tokens[nr_token].type = TK_HNUM;
+                strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
+                nr_token ++;
+                break;
+            case TK_EQ:
+                tokens[nr_token].type = TK_EQ;
+                strcpy(tokens[nr_token].str, "==");
+                nr_token++;
+                break;
+            case TK_NEQ:
+                tokens[nr_token].type = TK_NEQ;
+                strcpy(tokens[nr_token].str, "!=");
+                nr_token++;
+				break;
+			case TK_OR:
+                tokens[nr_token].type = TK_OR;
+                strcpy(tokens[nr_token].str, "||");
+                nr_token++;
+                break;
+            case TK_AND:
+                tokens[nr_token].type = TK_AND;
+                strcpy(tokens[nr_token].str, "&&");
+                nr_token++;
+                break;
+            default:
+              printf("i = %d and No rules is com.\n", i);
+                break;
 
+        }
         break;
       }
     }
