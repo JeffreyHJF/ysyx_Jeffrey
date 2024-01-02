@@ -91,7 +91,7 @@ static int cmd_x(char *args) {
 	else {
 		ret = sscanf(args, "%d %lx",&len, &addr);
 		printf("ret = %d", ret);
-		check(ret == 1, "Error when scanning");
+		check(ret == 2, "Error when scanning");
 		for(i=0;i<len;i++){
     		printf("%lx:%x\n",addr,paddr_read(addr,4));
     		addr += 4;
