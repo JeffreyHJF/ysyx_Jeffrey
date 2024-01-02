@@ -25,7 +25,7 @@ enum
   TK_NOTYPE = 256,TK_EQ = 255,TK_NEQ = 254,TK_AND = 253,TK_OR = 252,
   TK_HNUM = 251,TK_DNUM = 250,TK_NEG = 257,TK_REG = 258,TK_DEREF = 259, TK_LEF = 260, TK_RIG = 261
 };
-
+static int tokens_len;
 static struct rule {
   const char *regex;
   int token_type;
@@ -171,6 +171,7 @@ static bool make_token(char *e) {
                 break;
 
         }
+		tokens_len = nr_token;
         break;
       }
     }
@@ -184,15 +185,142 @@ static bool make_token(char *e) {
   return true;
 }
 
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+bool check_parentheses(int p, int q)
+{
+    if(tokens[p].type != '('  || tokens[q].type != ')')
+        return false;
+    int l = p , r = q;
+    while(l < r)
+    {
+        if(tokens[l].type == '('){
+            if(tokens[r].type == ')')
+            {
+                l ++ , r --;
+                continue;
+            }
+
+            else
+                r --;
+        }
+        else if(tokens[l].type == ')')
+            return false;
+        else l ++;
+    }
+    return true;
+}
+
+uint32_t eval(int p, int q) {
+    if (p > q) {
+        /* Bad expression */
+        assert(0);
+        return -1;
+    }
+    else if (p == q) {
+        /* Single token.
+         * For now this token should be a number.
+         * Return the value of the number.
+         */
+        return atoi(tokens[p].str);
+    }
+    else if (check_parentheses(p, q) == true) {
+        /* The expression is surrounded by a matched pair of parentheses.
+         * If that is the case, just throw away the parentheses.
+         */
+        // printf("check p = %d, q = %d\n",p + 1 , q - 1);
+        return eval(p + 1, q - 1);
+    }
+    /* else if(check_parentheses(p, q) == false){
+       printf("Unique\n");
+       return -1;
+       }
+       */
+    else {
+        int op = -1; // op = the position of 主运算符 in the token expression;
+        bool flag = false;
+        for(int i = p ; i <= q ; i ++)
+        {
+            if(tokens[i].type == '(')
+            {
+                while(tokens[i].type != ')')
+                    i ++;
+            }
+            if(!flag && tokens[i].type == TK_OR){
+                flag = true;
+                op = max(op,i);
+            }
+
+            if(!flag && tokens[i].type == TK_AND ){
+				flag = true;
+                op = max(op,i);
+            }
+
+            if(!flag && tokens[i].type == TK_NEQ){
+                flag = true;
+                op = max(op,i);
+            }
+
+            if(!flag && tokens[i].type == TK_EQ){
+                flag = true;
+                op = max(op,i);
+            }
+            if(!flag && (tokens[i].type == '+' || tokens[i].type == '-')){
+                flag = true;
+                op = max(op, i);
+            }
+            if(!flag && (tokens[i].type == '*' || tokens[i].type == '/') ){
+                op = max(op, i);
+            }
+        }
+        //      printf("op position is %d\n", op);
+        // if register return $register
+        int  op_type = tokens[op].type;
+
+        // 递归处理剩余的部分
+        uint32_t  val1 = eval(p, op - 1);
+        uint32_t  val2 = eval(op + 1, q);
+        //      printf("val1 = %d, val2 = %d \n", val1, val2);
+
+        switch (op_type) {
+            case '+':
+                return val1 + val2;
+            case '-':
+                return val1 - val2;
+            case '*':
+                return val1 * val2;
+            case '/':
+                if(val2 == 0){//printf("division can't zero;\n");
+                    assert(0);
+                    return 0;
+                }
+                return val1 / val2;
+            case TK_EQ:
+                return val1 == val2;
+            case TK_NEQ:
+                return val1 != val2;
+            case TK_OR:
+                return val1 || val2;
+            case TK_AND:
+                return val1 && val2;
+            default:
+                printf("No Op type.");
+                assert(0);
+        }
+    }
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
+//https://blog.csdn.net/weixin_61551023/article/details/131771435?spm=1001.2101.3001.6650.6&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-131771435-blog-109068930.235%5Ev40%5Epc_relevant_rights_sort&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-131771435-blog-109068930.235%5Ev40%5Epc_relevant_rights_sort&utm_relevant_index=9
+  	/* TODO: Insert codes to evaluate the expression. */
+	
 
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
+  return eval(0,tokens_len-1);
+  
 }
