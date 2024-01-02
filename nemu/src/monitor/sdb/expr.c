@@ -19,12 +19,11 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
-
-enum {
-  TK_NOTYPE = 256, TK_EQ,
-
+enum
+{
   /* TODO: Add more token types */
-
+  TK_NOTYPE = 256,TK_EQ = 255,TK_NEQ = 254,TK_AND = 253,TK_OR = 252,
+  TK_HNUM = 251,TK_DNUM = 250,TK_NEG = 257,TK_REG = 258,TK_DEREF = 259
 };
 
 static struct rule {
@@ -35,7 +34,13 @@ static struct rule {
   /* TODO: Add more rules.
    * Pay attention to the precedence level of different rules.
    */
-
+  {"\\b[0-9]+\\b", TK_DNUM},
+  {"/", '/'},
+  {"*", '*'},
+  {"-", '-'},
+  {"|{1,2}", TK_OR}, 
+  {"&{1,2}", TK_AND},
+  {"!=", TK_NEQ},
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
