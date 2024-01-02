@@ -102,6 +102,17 @@ static int cmd_x(char *args) {
 error:
 	return 1;
 }
+static int cmd_p(char* args){
+    if(args == NULL){
+        printf("No args\n");
+        return 0;
+    }
+    //  printf("args = %s\n", args);
+    bool flag = false;
+    expr(args, &flag);
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -115,6 +126,7 @@ static struct {
   { "si", "Run a step", cmd_si},
   { "info", "Display info", cmd_info},	
   { "x", "Scan Memory", cmd_x},
+  { "p", "print expr result", cmd_p},
   /* TODO: Add more commands */
 
 };
