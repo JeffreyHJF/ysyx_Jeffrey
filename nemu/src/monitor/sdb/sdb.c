@@ -19,6 +19,7 @@
 #include "sdb.h"
 #include <stdio.h>
 #include <memory/paddr.h>
+#include "../../../include/dbg.h"
 static int is_batch_mode = false;
 
 void init_regex();
@@ -89,13 +90,17 @@ static int cmd_x(char *args) {
     }
 	else {
 		ret = sscanf(args, "%d %lx",&len, &addr);
-		if(ret!=1) printf("error");
+		printf("ret = %d", ret);
+		check(ret == 1, "Error when scanning");
 		for(i=0;i<len;i++){
-    	printf("%lx:%x\n",addr,paddr_read(addr,4));
-    	addr += 4;
+    		printf("%lx:%x\n",addr,paddr_read(addr,4));
+    		addr += 4;
 		}
 	}
 	return 0;
+
+error:
+	return 1;
 }
 static int cmd_help(char *args);
 
