@@ -240,7 +240,7 @@ uint32_t eval(int p, int q) {
        */
     else {
         int op = -1; // op = the position of 主运算符 in the token expression;
-        bool flag = false;
+        bool flag = false;//low priority first but not considerate last gethering
         for(int i = p ; i <= q ; i ++)
         {
             if(tokens[i].type == '(')
