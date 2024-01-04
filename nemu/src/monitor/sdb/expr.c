@@ -355,6 +355,96 @@ word_t expr(char *e, bool *success) {
   }
 //https://blog.csdn.net/weixin_61551023/article/details/131771435?spm=1001.2101.3001.6650.6&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-131771435-blog-109068930.235%5Ev40%5Epc_relevant_rights_sort&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-131771435-blog-109068930.235%5Ev40%5Epc_relevant_rights_sort&utm_relevant_index=9
   	/* TODO: Insert codes to evaluate the expression. */
+     /*
+     * Init the tokens regex
+     * TODO getting value of reg of expr JEFF
+     *
+     */
+    for(int i = 0 ; i < tokens_len ; i ++)
+    {
+	if(tokens[i].type == TK_REG)
+	{
+	    bool flag = true;
+	    int tmp = isa_reg_str2val(tokens[i].str, &flag);
+	    if(flag){
+		int2char(tmp, tokens[i].str); // transfrom the str --> $egx
+	    }else{
+		printf("Transfrom error. \n");
+		assert(0);
+	    }
+	}
+    }
+
+  /*
+     * Init the tokens HEX
+     */
+    for(int i = 0 ; i < tokens_len ; i ++)
+    {
+        if(tokens[i].type == TK_HNUM)// Hex num
+        {
+            int value = strtol(tokens[i].str, NULL, 16);
+            int2char(value, tokens[i].str);
+        }
+    }
+    /*
+     * Init the tokens str. 1 ==> -1.
+     *
+     */
+    for(int i = 0 ; i < tokens_len ; i ++)
+    {
+	if((tokens[i].type == '-' && i > 0 && tokens[i-1].type != TK_DNUM && tokens[i+1].type == TK_DNUM)
+		||
+		(tokens[i].type == '-' && i == 0)
+	  )
+	{
+	    //printf("%s\n", tokens[i+1].str);
+	    tokens[i].type = TK_NOTYPE;
+	    //tokens[i].str = tmp;
+	    for(int j = 31 ; j >= 0 ; j --){
+		tokens[i+1].str[j] = tokens[i+1].str[j-1];
+	    }
+	    tokens[i+1].str[0] = '-';
+	    // printf("%s\n", tokens[i+1].str);
+	    for(int j = 0 ; j < tokens_len ; j ++){
+		if(tokens[j].type == TK_NOTYPE)
+		{
+		    for(int k = j +1 ; k < tokens_len ; k ++){
+			tokens[k - 1] = tokens[k];
+		    }
+		    tokens_len -- ;
+		}
+	    }
+	}
+    }
+
+    /*
+     * Init the tokens !
+     * TODO 
+     */
+    for(int i = 0 ; i < tokens_len ; i ++)
+    {
+	if(tokens[i].type == '!')
+	{
+	    tokens[i].type = TK_NOTYPE;
+	    int tmp = char2int(tokens[i+1].str);
+	    if(tmp == 0){
+		memset(tokens[i+1].str, 0 ,sizeof(tokens[i+1].str));
+		tokens[i+1].str[0] = '1';
+	    }
+	    else{
+		memset(tokens[i+1].str, 0 , sizeof(tokens[i+1].str));
+	    }
+	    for(int j = 0 ; j < tokens_len ; j ++){
+		if(tokens[j].type == TK_NOTYPE)
+		{
+		    for(int k = j +1 ; k < tokens_len ; k ++){
+			tokens[k - 1] = tokens[k];
+		    }
+		    tokens_len -- ;
+		}
+	    }
+	}
+    }
 
   for (int i = 0; i < tokens_len; i ++) {
   	if ((tokens[i].type == '*' && i ==0)
