@@ -27,6 +27,8 @@ typedef struct token {
 
 //Taks1 finding out token rule
 
-
+void info_watchpoint();
+void wp_set(char *args, int32_t res);
+void wp_remove(int no);
 
 #endif

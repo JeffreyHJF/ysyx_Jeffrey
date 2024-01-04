@@ -61,8 +61,15 @@ static int cmd_si(char *args) {
   }
   return 0;
 }
+static int cmd_q(char *args) {
+    nemu_state.state = NEMU_QUIT;
+    return -1;
+}
 
 static int cmd_info(char *args) {
+	int len;
+	unsigned long int addr;
+	int ret;
 	if(args == NULL) printf("Null args\n");
 	else if(strcmp(args, "r")==0){
 		isa_reg_display();
@@ -70,29 +77,12 @@ static int cmd_info(char *args) {
 /*	else if(strcmp(args, "w")==0){
 		sdb_watchpoint_display();
 	}*/
-	return 0;
 
-}
-
-static int cmd_q(char *args) {
-  nemu_state.state = NEMU_QUIT;
-  return -1;//modifying
-}
-
-static int cmd_x(char *args) {
-	int len;
-	int i;
-	long unsigned int addr;
-	int ret;
-	if (args == NULL) {
-        printf("Wrong Command!\n");
-        return 0;
-    }
 	else {
 		ret = sscanf(args, "%d %lx",&len, &addr);
 	//	printf("ret = %d", ret);
 		check(ret == 2, "Error when scanning");
-		for(i=0;i<len;i++){
+		for(int i=0;i<len;i++){
     		printf("%lx:%x\n",addr,paddr_read(addr,4));
     		addr += 4;
 		}
@@ -113,6 +103,55 @@ static int cmd_p(char* args){
     return 0;
 }
 
+//扫描内存
+static int cmd_x(char *args){
+  if (args == NULL) {
+        printf("Wrong Command!\n");
+        return 0;
+    }                                                                           
+	int N;
+  uint32_t startAddress;
+	sscanf(args,"%d%x",&N,&startAddress);
+	for (int i = 0;i < N;i ++){
+      printf("%x\n", paddr_read(startAddress,4));
+      //C语言会自动执行类型提升以匹配表达式的操作数的类型。所以，4 被转换为 uint32_t，
+      startAddress += 4;
+  
+  }
+   return 0;
+}
+
+//设置监视点
+static int cmd_w(char *args){
+ if (!args)
+  {
+    printf("Usage: w EXPR\n");
+    return 0;
+  }
+  bool success;
+  int32_t res = expr(args, &success);
+  if (!success) 
+  {
+    printf("invalid expression\n");
+  } 
+  else 
+  {
+    wp_set(args, res);
+  }
+  return 0;
+}
+ 
+//删除序列号为N的监视点
+static int cmd_d(char *args){
+  char *arg = strtok(NULL, "");
+  if (!arg) {
+    printf("Usage: d N\n");
+    return 0;
+  }
+  int no = strtol(arg, NULL, 10);
+  wp_remove(no);
+  return 0;
+}
 static int cmd_help(char *args);
 
 static struct {
@@ -127,6 +166,8 @@ static struct {
   { "info", "Display info", cmd_info},	
   { "x", "Scan Memory", cmd_x},
   { "p", "print expr result", cmd_p},
+  { "w", "set a watchpoint for exprs", cmd_w},
+  { "d", "del a watchpoint by No. ", cmd_d},
   /* TODO: Add more commands */
 
 };
