@@ -370,7 +370,7 @@ word_t expr(char *e, bool *success) {
             int2char(value, tokens[i+1].str);	    
             // 
             for(int j = 0 ; j < tokens_len ; j ++){
-                if(tokens[j].type == TK_NOTYPE){
+                if(tokens[j].type == TK_DEREF){
                     for(int k = j +1 ; k < tokens_len ; k ++){
                     tokens[k - 1] = tokens[k];
                 }
