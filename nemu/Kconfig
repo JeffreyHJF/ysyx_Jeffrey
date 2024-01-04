@@ -15,7 +15,7 @@ endchoice
 
 config WATCHPOINT
   bool "Enable watchpoint"
-  default n
+  default y
   help
     Enable watchpoint feature to monitor memory access.
 
