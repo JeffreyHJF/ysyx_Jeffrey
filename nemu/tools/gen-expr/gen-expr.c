@@ -19,7 +19,8 @@
 #include <time.h>
 #include <assert.h>
 #include <string.h>
-#include "../../include/common.h"
+#include "common.h"
+#define MAX_DEPTH 3
 // this should be enough
 static char buf[65536] = {};
 static char code_buf[65536 + 128] = {}; // a little larger than `buf`
@@ -36,9 +37,10 @@ static word_t choose(word_t n)
   return rand()%n;
 }
  
-//生成一个随机数字
+//生成一个随机数字 too deep recursive function bugs
+
 static void gen_num() {
-    word_t num = rand() % 9 + 1;; // 生成0到9之间的随机数
+    word_t num = rand() % 9 ; // 生成0到9之间的随机数
     char num_str[2]; //临时缓冲区
     snprintf(num_str, sizeof(num_str), "%d", num);//将数字转化为字符串
     if(strlen(buf)+strlen(num_str)<sizeof(buf))
@@ -63,7 +65,11 @@ static void gen_rand_op() {
  
  
 // 生成随机表达式
-static void gen_rand_expr() {
+static void gen_rand_expr(int depth) {
+	if(depth > MAX_DEPTH) {
+		gen_num();	
+	} 
+	else {
     switch (choose(3)) {
         case 0: 
             if( buf[strlen(buf) - 1]!=')')
@@ -72,7 +78,7 @@ static void gen_rand_expr() {
             }
             else
             {
-              gen_rand_expr();
+              gen_rand_expr(depth + 1);
             }
             break;
         case 1: 
@@ -80,20 +86,21 @@ static void gen_rand_expr() {
             if (buf[0] != '\0' &&  strchr("+-*/", buf[strlen(buf) - 1]))
             {
                 strcat(buf, "("); // 将左括号添加到缓冲区末尾
-                gen_rand_expr(); // 递归生成随机表达式
+                gen_rand_expr(depth + 1); // 递归生成随机表达式
                 strcat(buf, ")"); // 将右括号添加到缓冲区末尾
             } 
             else 
             {
-                gen_rand_expr(); // 递归生成随机表达式
+                gen_rand_expr(depth + 1); // 递归生成随机表达式
             }
             break;
         default: 
-            gen_rand_expr(); // 递归生成随机表达式
+            gen_rand_expr(depth + 1); // 递归生成随机表达式
             gen_rand_op(); // 生成随机操作符
-            gen_rand_expr(); // 递归生成随机表达式
+            gen_rand_expr(depth + 1); // 递归生成随机表达式
             break;
-    }
+      }
+	}
 }
  
  
@@ -102,6 +109,8 @@ static int check_division_by_zero() {
   char *p = buf;
   while (*p) {
     if (*p == '/' && *(p + 1) == '0') {
+	  printf(" divided by 0: %s", buf);
+	  buf[0] = '\0';
       return 1; // 表达式中存在除零行为
     }
     p++;
@@ -118,8 +127,11 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
-    gen_rand_expr();
-
+	buf[0] = '\0';
+    gen_rand_expr(0);
+	
+	if(check_division_by_zero())
+		continue;
     sprintf(code_buf, code_format, buf);
 
     FILE *fp = fopen("/tmp/.code.c", "w");
@@ -137,7 +149,7 @@ int main(int argc, char *argv[]) {
     ret = fscanf(fp, "%d", &result);
     pclose(fp);
 
-    printf("%u %s\n", result, buf);
-  }
+    printf("%d %s\n", result, buf);
+  }//generating result and its realted expr
   return 0;
 }
