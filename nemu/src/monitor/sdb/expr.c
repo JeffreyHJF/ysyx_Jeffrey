@@ -34,6 +34,7 @@ static struct rule {
   /* TODO: Add more rules.
    * Pay attention to the precedence level of different rules.
    */
+	
   {"\\$[a-zA-Z]*[0-9]*", TK_REG},
   {"0[xX][0-9a-fA-F]+", TK_HNUM},
   {"\\(", TK_LEF},
@@ -312,6 +313,41 @@ uint32_t eval(int p, int q) {
     }
 }
 
+int char2int(char s[]){
+    int s_size = strlen(s);
+    int res = 0 ;
+    for(int i = 0 ; i < s_size ; i ++)
+    {
+	res += s[i] - '0';
+	res *= 10;
+    }
+    res /= 10;
+    return res;
+}
+void int2char(int x, char str[]){
+    int len = strlen(str);
+    memset(str, 0, len);
+    int tmp_index = 0;
+    int tmp_x = x;
+    int x_size = 0, flag = 1;
+    while(tmp_x){
+	tmp_x /= 10;
+	x_size ++;
+	flag *= 10;
+    }
+    flag /= 10;
+    while(x)
+    {
+	int a = x / flag; 
+	x %= flag;
+	flag /= 10;
+	str[tmp_index ++] = a + '0';
+    }
+}
+
+
+
+
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
@@ -319,6 +355,30 @@ word_t expr(char *e, bool *success) {
   }
 //https://blog.csdn.net/weixin_61551023/article/details/131771435?spm=1001.2101.3001.6650.6&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-131771435-blog-109068930.235%5Ev40%5Epc_relevant_rights_sort&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-131771435-blog-109068930.235%5Ev40%5Epc_relevant_rights_sort&utm_relevant_index=9
   	/* TODO: Insert codes to evaluate the expression. */
+
+  for (int i = 0; i < tokens_len; i ++) {
+  	if ((tokens[i].type == '*' && i ==0)
+	  ||( tokens[i].type == '*' && i >0
+					&& (tokens[i-1].type =='+' || tokens[i-1].type == '-' || tokens[i-1].type == '*' || tokens[i-1].type == '/') 
+					&& (tokens[i+1].type == TK_DNUM || tokens[i+1].type == TK_HNUM)
+		)
+   	) {
+    tokens[i].type = TK_DEREF;
+	int tmp = char2int(tokens[i+1].str);
+            uintptr_t a = (uintptr_t)tmp;
+            int value = *((int*)a);
+            int2char(value, tokens[i+1].str);	    
+            // 
+            for(int j = 0 ; j < tokens_len ; j ++){
+                if(tokens[j].type == TK_NOTYPE){
+                    for(int k = j +1 ; k < tokens_len ; k ++){
+                    tokens[k - 1] = tokens[k];
+                }
+                    tokens_len -- ;
+                }
+            }
+  	}
+ } 
 	
 
   return eval(0,tokens_len-1);

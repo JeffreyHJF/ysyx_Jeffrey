@@ -18,7 +18,7 @@
 
 #include <common.h>
 
-word_t expr(char *e, bool *success);
+word_t expr(char *e, bool *success);//declaration function might be used in head file;
 
 typedef struct token {
 	int type;
