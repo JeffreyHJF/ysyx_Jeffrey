@@ -92,20 +92,18 @@ static int cmd_p(char* args){
 
 //扫描内存
 static int cmd_x(char *args){
-  if (args == NULL) {
-        printf("Wrong Command!\n");
-        return 0;
-    }                                                                           
-	int N;
-  uint32_t startAddress;
-	sscanf(args,"%d%x",&N,&startAddress);
-	for (int i = 0;i < N;i ++){
-      printf("%x\n", paddr_read(startAddress,4));
-      //C语言会自动执行类型提升以匹配表达式的操作数的类型。所以，4 被转换为 uint32_t，
-      startAddress += 4;
-  
-  }
-   return 0;
+    char* n = strtok(args," ");
+    char* baseaddr = strtok(NULL," ");
+    int len = 0;
+    paddr_t addr = 0;
+    sscanf(n, "%d", &len);
+    sscanf(baseaddr,"%x", &addr);
+    for(int i = 0 ; i < len ; i ++)
+    {
+        printf("%x\n",paddr_read(addr,4));//addr len
+        addr = addr + 4;
+    }
+    return 0;
 }
 
 //设置监视点
