@@ -67,31 +67,18 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_info(char *args) {
-	int len;
-	unsigned long int addr;
-	int ret;
+
 	if(args == NULL) printf("Null args\n");
 	else if(strcmp(args, "r")==0){
 		isa_reg_display();
 	}
-/*	else if(strcmp(args, "w")==0){
-		sdb_watchpoint_display();
-	}*/
 
-	else {
-		ret = sscanf(args, "%d %lx",&len, &addr);
-	//	printf("ret = %d", ret);
-		check(ret == 2, "Error when scanning");
-		for(int i=0;i<len;i++){
-    		printf("%lx:%x\n",addr,paddr_read(addr,4));
-    		addr += 4;
-		}
+	else if(strcmp(args, "w")==0) {
+		info_watchpoint();
 	}
 	return 0;
-
-error:
-	return 1;
 }
+
 static int cmd_p(char* args){
     if(args == NULL){
         printf("No args\n");
